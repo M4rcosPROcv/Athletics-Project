@@ -1,46 +1,172 @@
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.*;
+import java.util.ArrayList;
+import java.util.List;
 
-
-public class StudentDAO {
+public class StudentDAO implements StudentDAOIntf {
     
-    private String url = "";
-    private String username = "";
-    private String password = "";
+    public StudentDAO(){}
 
-    public StudentDAO(){
-       
-        // Reading the db credentials from json and assigning them to the variables
-        try {
-            Object o = new JSONParser().parse(new FileReader("config.json"));
-            JSONObject j = (JSONObject) o;
-            url = (String) j.get("db_url");
-            username = (String) j.get("db_username");
-            password = (String) j.get("db_password");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
+    @Override
+    public Student getStudent(int studentID) throws SQLException {
+
+        Student student = null;
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try{
+            connection = Database.getConnection();
+
+            String sql = "SELECT * FROM students WHERE studentID = ?";
+
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, studentID);
+
+            rs = ps.executeQuery();
+            if(rs.next()){
+                int ostudentID = rs.getInt("studentID");
+                String firstName = rs.getString("firstName");
+                String lastName = rs.getString("lastName");
+                String dateOfBirth = rs.getString("dateOfBirth");
+                String address = rs.getString("address");
+                String phoneNumber = rs.getString("phoneNumber");
+                String major = rs.getString("major");
+                String registrationYear = rs.getString("registrationYear");
+                boolean graduatedAtMassasoit = rs.getBoolean("graduatedAtMassasoit");
+                boolean transfer = rs.getBoolean("transfer");
+                String graduationOrTransferYear = rs.getString("graduationOrTransferYear");
+
+                student = new Student(ostudentID, firstName, lastName, dateOfBirth, address, 
+                phoneNumber, major, registrationYear, graduatedAtMassasoit, transfer, graduationOrTransferYear);
+            }
+            return student;
         }
-           
-        // Load the MySQL JDBC driver and connect to MySQL database.
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection connection = DriverManager.getConnection(url, username, password);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        finally{
+            Database.closeConnections(rs, ps, connection);
         }
+    }
+
+    @Override
+    public List<Student> getAllStudents() throws SQLException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try{
+            connection = Database.getConnection();
+            String sql = "SELECT * FROM students ORDER BY studentID";
+            ps = connection.prepareStatement(sql);
+            rs = ps.executeQuery();
+            return resultSetToStudents(rs);
+        }
+        finally{
+            Database.closeConnections(rs, ps, connection);
+        }
+    }
+
+    @Override
+    public int addStudent(Student student) throws SQLException {
+        Connection connection = null;
+        PreparedStatement ps = null;
         
+        try{
+            connection = Database.getConnection();
+            String sql = "INSERT INTO students (studentID, firstName, lastName, dateOfBirth, address," +
+            " phoneNumber, major, registrationYear, graduatedAtMassasoit, transfer, graduationOrTransferYear)" + 
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, student.getStudentID());
+            ps.setString(2, student.getFirstName());
+            ps.setString(3, student.getLastName());
+            ps.setString(4, student.getDateOfBirth());
+            ps.setString(5, student.getAddress());
+            ps.setString(6, student.getPhoneNumber());
+            ps.setString(7, student.getMajor());
+            ps.setString(8, student.getRegistrationYear());
+            ps.setBoolean(9, student.isGraduatedAtMassasoit());
+            ps.setBoolean(10, student.isTransfer());
+            ps.setString(11, student.getGraduationOrTransferYear());
+            int rs = ps.executeUpdate();
+
+            return rs;
+        }
+        finally {
+            Database.closeConnections(null, ps, connection);
+        }
+    }
+
+    @Override
+    public int updateStudent(Student student) throws SQLException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+
+        try{
+            connection = Database.getConnection();
+            String sql = "UPDATE students SET firstName =?, lastName =?, dateOfBirth =?, address =?, " +
+            "phoneNumber =?, major =?, registrationYear =?, graduatedAtMassasoit =?, transfer =?, " +
+            "graduationOrTransferYear =? WHERE studentID =?";
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, student.getFirstName());
+            ps.setString(2, student.getLastName());
+            ps.setString(3, student.getDateOfBirth());
+            ps.setString(4, student.getAddress());
+            ps.setString(5, student.getPhoneNumber());
+            ps.setString(6, student.getMajor());
+            ps.setString(7, student.getRegistrationYear());
+            ps.setBoolean(8, student.isGraduatedAtMassasoit());
+            ps.setBoolean(9, student.isTransfer());
+            ps.setString(10, student.getGraduationOrTransferYear());
+            ps.setInt(11, student.getStudentID());
+
+            int rs = ps.executeUpdate();
+            return rs;
+        }
+        finally{
+            Database.closeConnections(null, ps, connection);
+        }
+    }
+
+    @Override
+    public int deleteStudent(Student student) throws SQLException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+
+        try{
+            connection = Database.getConnection();
+            String sql = "DELETE FROM students WHERE studentID =?";
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, student.getStudentID());
+
+            int rs = ps.executeUpdate();
+            return rs;
+        }
+        finally{
+            Database.closeConnections(null, ps, connection);
+        }
+    }
+
+    private List<Student> resultSetToStudents(ResultSet rs) throws SQLException {
+        ArrayList<Student> students = new ArrayList<Student>();
+
+        while(rs.next()){
+            Student student = new Student();
+            student.setStudentID(rs.getInt("studentID"));
+            student.setFirstName(rs.getString("firstName"));
+            student.setLastName(rs.getString("lastName"));
+            student.setDateOfBirth(rs.getString("dateOfBirth"));
+            student.setAddress(rs.getString("address"));
+            student.setPhoneNumber(rs.getString("phoneNumber"));
+            student.setMajor(rs.getString("major"));
+            student.setRegistrationYear(rs.getString("registrationYear"));
+            student.setGraduatedAtMassasoit(rs.getBoolean("graduatedAtMassasoit"));
+            student.setTransfer(rs.getBoolean("transfer"));
+            student.setGraduationOrTransferYear(rs.getString("graduationOrTransferYear"));
+            students.add(student);
+        }
+        return students;
     }
 
 }
