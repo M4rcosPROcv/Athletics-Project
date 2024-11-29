@@ -14,9 +14,9 @@
             "type": "java",
             "name": "StudentUI",
             "request": "launch",
-            "mainClass": "StudentUI",
+            "mainClass": "StudentUI.StudentUI",
             "projectName": "Athletics_Project_4cee76a1",
             "vmArgs": "--module-path \"./lib\" --add-modules javafx.controls,javafx.fxml"
-        }    
+        }
     ]
 }
