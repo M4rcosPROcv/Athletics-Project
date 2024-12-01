@@ -12,7 +12,7 @@ public class StudentUI extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Stage loginStage = new Stage();
-        LoginWindow loginWindow = new LoginWindow(loginStage);
+        new LoginWindow(loginStage);
         StudentUI.primaryStage = primaryStage;
         Pane pane = new BorderPane();
         Scene scene = new Scene(pane, 600, 500);

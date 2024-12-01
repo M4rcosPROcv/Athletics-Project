@@ -25,7 +25,7 @@ public class UserDAO {
         try{
             
             // Getting the credentials from users database
-            conn = Database.getConnection2();
+            conn = Database.getConnection();
             String sql = "SELECT pass FROM creds WHERE username = '" + user + "'";
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();

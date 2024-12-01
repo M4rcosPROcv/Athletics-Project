@@ -12,6 +12,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -68,6 +69,12 @@ public class LoginWindow {
                 if(userDAO.authenticate()){ // Authentication
                     primaryStage.close(); // Close the login screen
                     StudentUI.mainWindow(); // Move to main window
+                }
+                else{
+                    // Show error message
+                    Label errorMessage = new Label("Invalid username or password.");
+                    errorMessage.setTextFill(Color.RED);
+                    mainPanel.setBottom(errorMessage);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
