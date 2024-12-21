@@ -16,7 +16,7 @@ public class UserDAO {
     private String userPassword;
 
     
-    public UserDAO(String user, String pass) throws SQLException {
+    public UserDAO(String email, String pass) throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -26,8 +26,9 @@ public class UserDAO {
             
             // Getting the credentials from users database
             conn = Database.getConnection();
-            String sql = "SELECT pass FROM creds WHERE email = '" + user + "'";
+            String sql = "SELECT pass FROM creds WHERE email = ?";
             ps = conn.prepareStatement(sql);
+            ps.setString(1, email);
             rs = ps.executeQuery();
             
             if(rs.next()){
@@ -39,7 +40,33 @@ public class UserDAO {
         }
     }
 
+    
+
+    public static  String getEmail(String email) throws SQLException{
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String retrievedEmail = null;
+
+        try{
+            conn = Database.getConnection();
+            String sql = "SELECT email FROM creds WHERE email =?";
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, email);
+            rs = ps.executeQuery();
+            
+            if(rs.next()){
+                retrievedEmail =  rs.getString("email");
+            }
+            return retrievedEmail;
+        }finally{
+            Database.closeConnections(rs, ps, conn);
+        }
+    }
+
     public boolean authenticate(){
+        if(retrievedPassword == null || retrievedPassword.isEmpty()) return false;
+
         // Split the salt and the hashed password
         String[] parts = retrievedPassword.split(":");
         String encodedSalt = parts[0];

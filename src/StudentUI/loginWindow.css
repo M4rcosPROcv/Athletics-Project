@@ -10,8 +10,29 @@
     -fx-pref-width: 75;
     -fx-pref-height: 10;
 }
+
+#connectButton:hover{
+    -fx-cursor: hand;
+}
 .label{
     -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-font-family: "Monaco";
+}
+
+#forgotPasswordLabel{
+    -fx-font-size: 12px;
+    -fx-text-fill: steelblue;
+}
+
+#showPassBox{
+    -fx-font-size: 12px;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+}
+
+#forgotPasswordLabel:hover{
+    -fx-text-fill: darkblue;
+    -fx-cursor: hand;
+    -fx-underline: true;
 }
