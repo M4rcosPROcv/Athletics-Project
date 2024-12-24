@@ -6,6 +6,9 @@ import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
@@ -32,9 +35,20 @@ public class ForgotPasswordScene {
     private Scene forgotPasswordScene;
     private AnchorPane forgotPasswordPanel;
     private Label forgotPasswordEmailLabel = new Label("Please enter your email to search for your account");
+    private String email;
     private TextField forgotPasswordEmailField = new TextField();
     private Button forgotPasswordSubmitButton = new Button("Search");
     private Button forgotPasswordCancelButton = new Button("Cancel");
+    private Button verifyCodeButton = new Button("Verify");
+    private Label resendCodeLabel = new Label("Resend Code");
+    private String otp;
+    private Label resetPasswordLabel = new Label("Please reset your password");
+    private TextField newPasswordField = new TextField();
+    private Label newPasswordLabel = new Label("New Password: ");
+    private TextField confirmPasswordField = new TextField();
+    private Label confirmPasswordLabel = new Label("Confirm Password: ");
+    private Button resetButton = new Button("Reset");
+    
 
     public ForgotPasswordScene(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -43,10 +57,18 @@ public class ForgotPasswordScene {
         forgotPasswordOperations();  
     }
 
-    public void forgotPasswordOperations(){
+    public void forgotPasswordOperations() {
+
+        SecureRandom secureRandom = new SecureRandom();
+        otp = new DecimalFormat("000000").format(secureRandom.nextInt(999999));
+
         forgotPasswordEmailLabel.setId("forgotEmailLabel");
+        resendCodeLabel.setId("resendCodeLabel");
+        resetPasswordLabel.setId("resetPasswordLabel");
+        confirmPasswordLabel.setId("confirmPasswordLabel");
+        newPasswordLabel.setId("newPasswordLabel");
         forgotPasswordEmailField.setPromptText("Email");
-            
+
         forgotPasswordPanel.getChildren().add(forgotPasswordEmailLabel);
         AnchorPane.setTopAnchor(forgotPasswordEmailLabel, 10.0);
         AnchorPane.setLeftAnchor(forgotPasswordEmailLabel, 27.0);
@@ -69,38 +91,55 @@ public class ForgotPasswordScene {
             LoginWindow.passwordField.clear();
             LoginWindow.passwordFieldViewed.clear();
             LoginWindow.emailField.requestFocus();
+            primaryStage.sizeToScene();
+            primaryStage.centerOnScreen();
         });
 
         forgotPasswordSubmitButton.setOnAction(event -> {
             try {
-                String email = UserDAO.getEmail(forgotPasswordEmailField.getText());
+                email = UserDAO.getEmail(forgotPasswordEmailField.getText());
 
-                if(email == null) {
-                    forgotPasswordEmailLabel.setText("No account was found with this email. Try again");
+                if (email == null) {
+                    forgotPasswordEmailLabel.setText("No account was found with this email. Try again.");
                     forgotPasswordEmailField.clear();
-                }
-                else{
-                    
-                    SecureRandom secureRandom = new SecureRandom();
-                    String otp = new DecimalFormat("000000").format(secureRandom.nextInt(999999));
-                    
-                    String finalOtp = otp;
-                    
-                    // sendEmail(email, otp);
-                    
-                    forgotPasswordEmailLabel.setText("Your account was found and a one-time code has been sent to your email address\n" +
-                                                      "Please enter the one-time code you received in your email below");
+                } else {
+
+                    forgotPasswordEmailLabel.setText(
+                            "Your account was found and a one-time code has been sent to your email address.\n" +
+                                    "\t\tPlease enter the 6-digit code sent to your email.");
                     forgotPasswordEmailField.clear();
 
-                    // Pane => forgotPasswordPanel; 
+                    sendEmail(email, otp);
 
-                    // After sending the OTP, change the email field's prompt text to "Enter the OTP"
-                    // forgotPasswordEmailField.setPromptText("Enter the OTP");
+                    // Schedule a task after 2 minutes to expire the code sent.
+                    ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                    scheduler.schedule(() -> {
+                        otp = null;
+                        System.out.println("Code expired");
+                    }, 2, TimeUnit.MINUTES);
 
-                    
+                    primaryStage.setWidth(593);
+                    primaryStage.centerOnScreen();
+
                     // Reset the email field after sending the OTP.
                     forgotPasswordEmailField.clear();
                     forgotPasswordEmailField.setPromptText("One-Time Code");
+
+                    AnchorPane.setTopAnchor(forgotPasswordEmailField, 60.0);
+                    AnchorPane.setLeftAnchor(forgotPasswordEmailField, 215.0);
+
+                    AnchorPane.setTopAnchor(forgotPasswordCancelButton, 125.0);
+                    AnchorPane.setLeftAnchor(forgotPasswordCancelButton, 220.0);
+
+                    forgotPasswordPanel.getChildren().remove(forgotPasswordSubmitButton);
+
+                    forgotPasswordPanel.getChildren().add(verifyCodeButton);
+                    AnchorPane.setTopAnchor(verifyCodeButton, 125.0);
+                    AnchorPane.setLeftAnchor(verifyCodeButton, 310.0);
+
+                    forgotPasswordPanel.getChildren().add(resendCodeLabel);
+                    AnchorPane.setTopAnchor(resendCodeLabel, 95.0);
+                    AnchorPane.setLeftAnchor(resendCodeLabel, 260.0);
                 }
 
             } catch (SQLException e) {
@@ -108,16 +147,49 @@ public class ForgotPasswordScene {
             }
         });
 
+        resendCodeLabel.setOnMouseClicked(e -> {
+            otp = new DecimalFormat("000000").format(secureRandom.nextInt(999999));
+            sendEmail(email, otp);
+            forgotPasswordEmailLabel.setText("A code has been resent to your email address.");
+            forgotPasswordEmailField.clear();
             
-            
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+            scheduler.schedule(() -> {
+                otp = null;
+                System.out.println("Code expired");
+            }, 2, TimeUnit.MINUTES);
+        });
+
+        verifyCodeButton.setOnAction(event -> {
+            if (forgotPasswordEmailField.getText().equals(otp)) {
+                forgotPasswordPanel.getChildren().clear();
+                forgotPasswordPanel.getChildren().add(resetPasswordLabel);
+
+                forgotPasswordPanel.getChildren().add(newPasswordLabel);
+
+                forgotPasswordPanel.getChildren().add(newPasswordField);
+
+                forgotPasswordPanel.getChildren().add(confirmPasswordLabel);
+
+                forgotPasswordPanel.getChildren().add(confirmPasswordField);
+
+                forgotPasswordPanel.getChildren().add(resetButton);
+
+            } else if (otp == null) {
+                forgotPasswordEmailLabel.setText("The code has expired. Try resending it.");
+            } else {
+                forgotPasswordEmailLabel.setText("Invalid one-time code. Try again.");
+            }
+        });
+
         forgotPasswordScene = new Scene(forgotPasswordPanel, 390, 280);
         String css = this.getClass().getResource("forgotPasswordWindow.css").toExternalForm();
         forgotPasswordScene.getStylesheets().add(css);
-            
+
         primaryStage.setScene(forgotPasswordScene);
     }
 
-    public void sendEmail(String email, String otp){
+    public void sendEmail(String email, String otp) {
 
         // Email details
         final String senderEmail;
@@ -125,11 +197,9 @@ public class ForgotPasswordScene {
         final String receiverEmail = email;
         final String subject = "One-Time Code";
         final String body = "<html><body>" +
-                            "Your one-time code is: <b>" + otp + "</b><br>" +
-                            " This code will expire in 2 minutes." +
-                            "</body></html>"
-        
-        ;
+                "Your one-time code is: <b>" + otp + "</b><br>" +
+                " This code will expire in 2 minutes." +
+                "</body></html>";
 
         // Set up the SMTP server properties
         Properties properties = new Properties();
@@ -147,16 +217,16 @@ public class ForgotPasswordScene {
             senderEmail = (String) j.get("email_username");
             senderPassword = (String) j.get("email_password");
 
-            //Get a session object
+            // Get a session object
             Session session = Session.getInstance(properties,
-            new jakarta.mail.Authenticator() {
-                protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
-                    return new jakarta.mail.PasswordAuthentication(senderEmail, senderPassword);
-                }
-            });
+                    new jakarta.mail.Authenticator() {
+                        protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+                            return new jakarta.mail.PasswordAuthentication(senderEmail, senderPassword);
+                        }
+                    });
 
-            //Create a MimeMessage
-            try{
+            // Create a MimeMessage
+            try {
                 Message message = new MimeMessage(session);
 
                 // Set the sender and recipient email addresses
@@ -170,7 +240,7 @@ public class ForgotPasswordScene {
                 // Send the email
                 Transport.send(message);
 
-            } catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
