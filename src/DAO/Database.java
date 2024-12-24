@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -22,7 +23,10 @@ public class Database {
             Class.forName("com.mysql.cj.jdbc.Driver"); 
 
             Object o = new JSONParser().parse(new FileReader("config.json"));
-            JSONObject j = (JSONObject) o;
+
+            JSONArray dbArray = (JSONArray) o;
+
+            JSONObject j = (JSONObject) dbArray.get(0);
             url = (String) j.get("db_url");
             username = (String) j.get("db_username");
             password = (String) j.get("db_password");

@@ -1,9 +1,6 @@
 package StudentUI;
 
 import java.sql.SQLException;
-import java.text.DecimalFormat;
-import java.util.Random;
-
 import DAO.UserDAO;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
@@ -25,21 +22,21 @@ public class LoginWindow {
     private Label emailLabel = new Label("Email : ");
     private Label passwordLabel = new Label("Password : ");
     private Label forgotPasswordLabel = new Label("Forgot Password?");
-    private TextField emailField = new TextField();
-    private PasswordField passwordField = new PasswordField();
-    private TextField passwordFieldViewed = new TextField();
+    protected static TextField emailField = new TextField();
+    protected static PasswordField passwordField = new PasswordField();
+    protected static TextField passwordFieldViewed = new TextField();
     private Button connectButton = new Button("Connect");
     private CheckBox showPassBox = new CheckBox("Show Password");
 
     private Stage primaryStage;
-    private Scene scene;
+    protected static Scene scene;
     private AnchorPane mainPanel;
     private GridPane grid = new GridPane();
 
     public LoginWindow(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.mainPanel = new AnchorPane();
-        this.scene = new Scene(mainPanel, 280, 135);
+        LoginWindow.scene = new Scene(mainPanel, 280, 135);
         addComponents();
         start();
     }
