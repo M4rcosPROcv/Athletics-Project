@@ -10,11 +10,12 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class LoginWindow {
@@ -36,7 +37,7 @@ public class LoginWindow {
     public LoginWindow(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.mainPanel = new AnchorPane();
-        LoginWindow.scene = new Scene(mainPanel, 280, 135);
+        LoginWindow.scene = new Scene(mainPanel, 280, 175);
         addComponents();
         start();
     }
@@ -44,7 +45,7 @@ public class LoginWindow {
 
     public void start() {
         primaryStage.setScene(scene);
-        String css = this.getClass().getResource("loginWindow.css").toExternalForm();
+        String css = this.getClass().getResource("/stylesheets/loginWindow.css").toExternalForm();
         scene.getStylesheets().add(css);
         primaryStage.setResizable(false);
         emailField.requestFocus();
@@ -56,8 +57,7 @@ public class LoginWindow {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setAlignment(Pos.CENTER);
-
-        
+        GridPane.setHalignment(emailLabel, HPos.CENTER );
         
         grid.add(emailLabel, 0, 0);
         grid.add(emailField, 1, 0);
@@ -66,29 +66,22 @@ public class LoginWindow {
 
         connectButton.setId("connectButton");
         mainPanel.getChildren().add(connectButton);
-        AnchorPane.setTopAnchor(connectButton, 100.0);
-        AnchorPane.setLeftAnchor(connectButton, 145.0);
-        GridPane.setHalignment(connectButton, HPos.CENTER );
+        AnchorPane.setTopAnchor(connectButton, 125.0);
+        AnchorPane.setLeftAnchor(connectButton, 140.0);
+
         mainPanel.getChildren().add(grid);
         AnchorPane.setTopAnchor(grid, 10.0);
         AnchorPane.setLeftAnchor(grid, 15.0);
 
         forgotPasswordLabel.setId("forgotPasswordLabel");
         mainPanel.getChildren().add(forgotPasswordLabel);
-        AnchorPane.setTopAnchor(forgotPasswordLabel, 75.0);
-        AnchorPane.setLeftAnchor(forgotPasswordLabel, 145.0);
+        AnchorPane.setTopAnchor(forgotPasswordLabel, 100.0);
+        AnchorPane.setLeftAnchor(forgotPasswordLabel, 138.0);
 
         showPassBox.setId("showPassBox");
         mainPanel.getChildren().add(showPassBox);
-        AnchorPane.setTopAnchor(showPassBox, 75.0);
+        AnchorPane.setTopAnchor(showPassBox, 100.0);
         AnchorPane.setLeftAnchor(showPassBox, 15.0);
-
-        mainPanel.getChildren().add(passwordFieldViewed);
-        AnchorPane.setTopAnchor(passwordFieldViewed, 46.0);
-        AnchorPane.setLeftAnchor(passwordFieldViewed, 110.0);
-
-        passwordFieldViewed.setManaged(false);
-        passwordFieldViewed.setVisible(false);
 
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> passwordFieldViewed.setText(newValue));
         passwordFieldViewed.textProperty().addListener((observable, oldValue, newValue) -> passwordField.setText(newValue));
@@ -96,19 +89,15 @@ public class LoginWindow {
         showPassBox.setOnAction(e -> {
             if(showPassBox.isSelected()){
                 passwordFieldViewed.setText(passwordField.getText());
-                passwordFieldViewed.setManaged(true);
-                passwordFieldViewed.setVisible(true);
-                passwordField.setManaged(false);
-                passwordField.setVisible(false);
+                grid.getChildren().remove(passwordField);
+                grid.add(passwordFieldViewed, 1, 1);
                 passwordFieldViewed.requestFocus();
                 passwordFieldViewed.positionCaret(passwordFieldViewed.getText().length());
             }
             else{
                 passwordField.setText(passwordFieldViewed.getText());
-                passwordFieldViewed.setManaged(false);
-                passwordFieldViewed.setVisible(false);
-                passwordField.setManaged(true);
-                passwordField.setVisible(true);
+                grid.getChildren().remove(passwordFieldViewed);
+                grid.add(passwordField, 1, 1);
                 passwordField.requestFocus();
                 passwordField.positionCaret(passwordField.getText().length());
             }
@@ -126,11 +115,13 @@ public class LoginWindow {
                 else{
                     // Show error message
                     Label errorMessage = new Label("Invalid email or password.");
-                    errorMessage.setTextFill(Color.RED);
-                    primaryStage.setHeight(150);
+                    errorMessage.setId("errorMessage");
+
+                    mainPanel.getChildren().removeIf(node -> node instanceof Label && ((Label) node).getId() != null && ((Label) node).getId().equals("errorMessage")); 
+
                     mainPanel.getChildren().add(errorMessage);
-                    AnchorPane.setTopAnchor(errorMessage, 72.0);
-                    AnchorPane.setLeftAnchor(errorMessage, 67.0);
+                    AnchorPane.setTopAnchor(errorMessage, 80.0);
+                    AnchorPane.setLeftAnchor(errorMessage, 120.0);
                     
                 }
             } catch (SQLException e) {

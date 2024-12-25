@@ -26,6 +26,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -106,7 +108,7 @@ public class ForgotPasswordScene {
 
                     forgotPasswordEmailLabel.setText(
                             "Your account was found and a one-time code has been sent to your email address.\n" +
-                                    "\t\tPlease enter the 6-digit code sent to your email.");
+                                    "\t\t\tPlease enter the 6-digit code sent to your email.");
                     forgotPasswordEmailField.clear();
 
                     sendEmail(email, otp);
@@ -116,6 +118,7 @@ public class ForgotPasswordScene {
                     scheduler.schedule(() -> {
                         otp = null;
                         System.out.println("Code expired");
+                        scheduler.shutdown();
                     }, 2, TimeUnit.MINUTES);
 
                     primaryStage.setWidth(593);
@@ -152,11 +155,12 @@ public class ForgotPasswordScene {
             sendEmail(email, otp);
             forgotPasswordEmailLabel.setText("A code has been resent to your email address.");
             forgotPasswordEmailField.clear();
-            
+
             ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
             scheduler.schedule(() -> {
                 otp = null;
                 System.out.println("Code expired");
+                scheduler.shutdown();
             }, 2, TimeUnit.MINUTES);
         });
 
@@ -183,8 +187,11 @@ public class ForgotPasswordScene {
         });
 
         forgotPasswordScene = new Scene(forgotPasswordPanel, 390, 280);
-        String css = this.getClass().getResource("forgotPasswordWindow.css").toExternalForm();
+        String css = this.getClass().getResource("/stylesheets/forgotPasswordWindow.css").toExternalForm();
         forgotPasswordScene.getStylesheets().add(css);
+
+        KeyCodeCombination searchHotKey = new KeyCodeCombination(KeyCode.ENTER);
+        forgotPasswordScene.getAccelerators().put(searchHotKey, () -> forgotPasswordSubmitButton.fire());
 
         primaryStage.setScene(forgotPasswordScene);
     }
