@@ -1,6 +1,7 @@
 package DAO;
 
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +14,7 @@ import org.bouncycastle.crypto.params.Argon2Parameters;
 public class UserDAO {
 
     private String retrievedPassword;
+    private String userEmail;
     private String userPassword;
 
     
@@ -40,30 +42,78 @@ public class UserDAO {
         }
     }
 
-    
-
-    public static  String getEmail(String email) throws SQLException{
+    public UserDAO(String email) throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String retrievedEmail = null;
+        userEmail = null;
 
         try{
+            
+            // Getting the credentials from users database
             conn = Database.getConnection();
-            String sql = "SELECT email FROM creds WHERE email =?";
+            String sql = "SELECT * FROM creds WHERE email = ?";
             ps = conn.prepareStatement(sql);
             ps.setString(1, email);
             rs = ps.executeQuery();
             
             if(rs.next()){
-                retrievedEmail =  rs.getString("email");
+                userEmail = rs.getString("email");
             }
-            return retrievedEmail;
+
+        } finally{
+            Database.closeConnections(rs, ps, conn);
+        }
+    }
+
+    public void updateUserPassword(String newPass){
+        // Encode the new password and generate a salt
+        byte[] salt = new byte[16]; // 128-bit salt
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.nextBytes(salt);
+        
+        Argon2Parameters.Builder builder = new Argon2Parameters.Builder(Argon2Parameters.ARGON2_id)
+        .withSalt(salt)                         // Use the generated salt
+        .withParallelism(1)         // Number of threads (1 is default)
+        .withMemoryAsKB(65536)           // Memory in KB (e.g., 64MB)
+        .withIterations(3);          // Number of iterations
+
+        Argon2Parameters parameters = builder.build();
+        
+        Argon2BytesGenerator generator = new Argon2BytesGenerator();
+        generator.init(parameters);
+
+        byte[] passwordBytes = newPass.getBytes(StandardCharsets.UTF_8);
+        byte[] hash = new byte[32];
+        generator.generateBytes(passwordBytes, hash);
+
+        String encodedHash = Base64.getEncoder().encodeToString(hash);
+        String encodedSalt = Base64.getEncoder().encodeToString(salt);
+
+        String newPassword = encodedSalt + ":" + encodedHash;
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = Database.getConnection();
+            String sql = "UPDATE creds SET pass =? WHERE email =?";
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, newPassword);
+            ps.setString(2, userEmail);
+            ps.executeUpdate();
+
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }finally{
             Database.closeConnections(rs, ps, conn);
         }
     }
 
+    
     public boolean authenticate(){
         if(retrievedPassword == null || retrievedPassword.isEmpty()) return false;
 
@@ -103,5 +153,10 @@ public class UserDAO {
         // Verify the password
         return isMatch;
     }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
 }
 

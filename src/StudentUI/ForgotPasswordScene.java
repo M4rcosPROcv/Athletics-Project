@@ -22,21 +22,28 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import DAO.UserDAO;
+import javafx.animation.PauseTransition;
+import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class ForgotPasswordScene {
 
     private Stage primaryStage;
     private Scene forgotPasswordScene;
     private AnchorPane forgotPasswordPanel;
-    private Label forgotPasswordEmailLabel = new Label("Please enter your email to search for your account");
+    private Label forgotPasswordEmailLabel = new Label("Please enter your email to search for your account.");
     private String email;
     private TextField forgotPasswordEmailField = new TextField();
     private Button forgotPasswordSubmitButton = new Button("Search");
@@ -44,18 +51,25 @@ public class ForgotPasswordScene {
     private Button verifyCodeButton = new Button("Verify");
     private Label resendCodeLabel = new Label("Resend Code");
     private String otp;
-    private Label resetPasswordLabel = new Label("Please reset your password");
-    private TextField newPasswordField = new TextField();
+    private Label resetPasswordLabel = new Label("Please reset your password.");
     private Label newPasswordLabel = new Label("New Password: ");
-    private TextField confirmPasswordField = new TextField();
+    private PasswordField newPasswordField = new PasswordField();
+    private TextField newPasswordTextField = new TextField();
     private Label confirmPasswordLabel = new Label("Confirm Password: ");
+    private PasswordField confirmPasswordField = new PasswordField();
+    private TextField confirmPasswordTextField = new TextField();
     private Button resetButton = new Button("Reset");
+    private CheckBox showPasswordCheckBox = new CheckBox("Show Password");
+    private Label codeErrorMessage = new Label();
+
+    private UserDAO userDAO;
     
+    GridPane grid = new GridPane();
 
     public ForgotPasswordScene(Stage primaryStage) {
         this.primaryStage = primaryStage;
         forgotPasswordPanel = new AnchorPane();
-            
+
         forgotPasswordOperations();  
     }
 
@@ -63,28 +77,26 @@ public class ForgotPasswordScene {
 
         SecureRandom secureRandom = new SecureRandom();
         otp = new DecimalFormat("000000").format(secureRandom.nextInt(999999));
-
+        
         forgotPasswordEmailLabel.setId("forgotEmailLabel");
         resendCodeLabel.setId("resendCodeLabel");
-        resetPasswordLabel.setId("resetPasswordLabel");
-        confirmPasswordLabel.setId("confirmPasswordLabel");
-        newPasswordLabel.setId("newPasswordLabel");
-        forgotPasswordEmailField.setPromptText("Email");
+        codeErrorMessage.setId("codeErrorMessage");
+        showPasswordCheckBox.setId("showPasswordCheckBox");
 
         forgotPasswordPanel.getChildren().add(forgotPasswordEmailLabel);
         AnchorPane.setTopAnchor(forgotPasswordEmailLabel, 10.0);
         AnchorPane.setLeftAnchor(forgotPasswordEmailLabel, 27.0);
 
         forgotPasswordPanel.getChildren().add(forgotPasswordEmailField);
-        AnchorPane.setTopAnchor(forgotPasswordEmailField, 40.0);
+        AnchorPane.setTopAnchor(forgotPasswordEmailField, 45.0);
         AnchorPane.setLeftAnchor(forgotPasswordEmailField, 125.0);
 
         forgotPasswordPanel.getChildren().add(forgotPasswordSubmitButton);
-        AnchorPane.setTopAnchor(forgotPasswordSubmitButton, 75.0);
-        AnchorPane.setLeftAnchor(forgotPasswordSubmitButton, 220.0);
+        AnchorPane.setTopAnchor(forgotPasswordSubmitButton, 90.0);
+        AnchorPane.setLeftAnchor(forgotPasswordSubmitButton, 230.0);
 
         forgotPasswordPanel.getChildren().add(forgotPasswordCancelButton);
-        AnchorPane.setTopAnchor(forgotPasswordCancelButton, 75.0);
+        AnchorPane.setTopAnchor(forgotPasswordCancelButton, 90.0);
         AnchorPane.setLeftAnchor(forgotPasswordCancelButton, 130.0);
 
         forgotPasswordCancelButton.setOnAction(e -> {
@@ -99,17 +111,20 @@ public class ForgotPasswordScene {
 
         forgotPasswordSubmitButton.setOnAction(event -> {
             try {
-                email = UserDAO.getEmail(forgotPasswordEmailField.getText());
+                userDAO = new UserDAO(forgotPasswordEmailField.getText());
+                email = userDAO.getUserEmail();
 
                 if (email == null) {
                     forgotPasswordEmailLabel.setText("No account was found with this email. Try again.");
                     forgotPasswordEmailField.clear();
+                    forgotPasswordEmailField.requestFocus();
                 } else {
 
                     forgotPasswordEmailLabel.setText(
                             "Your account was found and a one-time code has been sent to your email address.\n" +
                                     "\t\t\tPlease enter the 6-digit code sent to your email.");
                     forgotPasswordEmailField.clear();
+                    AnchorPane.setLeftAnchor(forgotPasswordEmailLabel, 15.0);
 
                     sendEmail(email, otp);
 
@@ -128,21 +143,23 @@ public class ForgotPasswordScene {
                     forgotPasswordEmailField.clear();
                     forgotPasswordEmailField.setPromptText("One-Time Code");
 
-                    AnchorPane.setTopAnchor(forgotPasswordEmailField, 60.0);
-                    AnchorPane.setLeftAnchor(forgotPasswordEmailField, 215.0);
+                    AnchorPane.setTopAnchor(forgotPasswordEmailField, 65.0);
+                    AnchorPane.setLeftAnchor(forgotPasswordEmailField, 175.0);
 
-                    AnchorPane.setTopAnchor(forgotPasswordCancelButton, 125.0);
-                    AnchorPane.setLeftAnchor(forgotPasswordCancelButton, 220.0);
+                    AnchorPane.setTopAnchor(forgotPasswordCancelButton, 145.0);
+                    AnchorPane.setLeftAnchor(forgotPasswordCancelButton, 180.0);
 
                     forgotPasswordPanel.getChildren().remove(forgotPasswordSubmitButton);
 
                     forgotPasswordPanel.getChildren().add(verifyCodeButton);
-                    AnchorPane.setTopAnchor(verifyCodeButton, 125.0);
-                    AnchorPane.setLeftAnchor(verifyCodeButton, 310.0);
+                    AnchorPane.setTopAnchor(verifyCodeButton, 145.0);
+                    AnchorPane.setLeftAnchor(verifyCodeButton, 285.0);
 
                     forgotPasswordPanel.getChildren().add(resendCodeLabel);
-                    AnchorPane.setTopAnchor(resendCodeLabel, 95.0);
-                    AnchorPane.setLeftAnchor(resendCodeLabel, 260.0);
+                    AnchorPane.setTopAnchor(resendCodeLabel, 120.0);
+                    AnchorPane.setLeftAnchor(resendCodeLabel, 245.0);
+
+                    primaryStage.setHeight(250);
                 }
 
             } catch (SQLException e) {
@@ -152,9 +169,17 @@ public class ForgotPasswordScene {
 
         resendCodeLabel.setOnMouseClicked(e -> {
             otp = new DecimalFormat("000000").format(secureRandom.nextInt(999999));
-            sendEmail(email, otp);
-            forgotPasswordEmailLabel.setText("A code has been resent to your email address.");
+            codeErrorMessage.setText("New one-time code sent to your email.");
             forgotPasswordEmailField.clear();
+            
+            forgotPasswordPanel.getChildren().removeIf(node -> node instanceof Label && ((Label) node).getId() != null && ((Label) node).getId().equals("codeErrorMessage"));
+            
+            forgotPasswordPanel.getChildren().add(codeErrorMessage);
+            AnchorPane.setTopAnchor(codeErrorMessage, 95.0);
+            AnchorPane.setLeftAnchor(codeErrorMessage, 180.0);
+            forgotPasswordEmailField.requestFocus();
+
+            sendEmail(email, otp);
 
             ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
             scheduler.schedule(() -> {
@@ -166,34 +191,170 @@ public class ForgotPasswordScene {
 
         verifyCodeButton.setOnAction(event -> {
             if (forgotPasswordEmailField.getText().equals(otp)) {
+                
                 forgotPasswordPanel.getChildren().clear();
                 forgotPasswordPanel.getChildren().add(resetPasswordLabel);
-
-                forgotPasswordPanel.getChildren().add(newPasswordLabel);
-
-                forgotPasswordPanel.getChildren().add(newPasswordField);
-
-                forgotPasswordPanel.getChildren().add(confirmPasswordLabel);
-
-                forgotPasswordPanel.getChildren().add(confirmPasswordField);
-
+                AnchorPane.setLeftAnchor(resetPasswordLabel, 95.0);
+                AnchorPane.setTopAnchor(resetPasswordLabel, 20.0);
+                
+                grid.setHgap(10);
+                grid.setVgap(10);
+                grid.setAlignment(Pos.CENTER);
+                grid.add(newPasswordLabel, 0, 0);
+                GridPane.setHalignment(newPasswordLabel, HPos.CENTER );
+                grid.add(newPasswordField, 1, 0);
+                grid.add(confirmPasswordLabel, 0, 1);
+                grid.add(confirmPasswordField, 1, 1);
+                
+                forgotPasswordPanel.getChildren().add(grid);
+                AnchorPane.setLeftAnchor(grid, 15.0); 
+                AnchorPane.setTopAnchor(grid, 60.0);
+                
                 forgotPasswordPanel.getChildren().add(resetButton);
+                AnchorPane.setTopAnchor(resetButton, 155.0);
+                AnchorPane.setLeftAnchor(resetButton, 280.0);
+                
+                forgotPasswordPanel.getChildren().add(forgotPasswordCancelButton);
+                AnchorPane.setTopAnchor(forgotPasswordCancelButton, 155.0);
+                AnchorPane.setLeftAnchor(forgotPasswordCancelButton, 175.0);
+    
+                forgotPasswordPanel.getChildren().add(showPasswordCheckBox);
+                AnchorPane.setTopAnchor(showPasswordCheckBox, 155.0);
+                AnchorPane.setLeftAnchor(showPasswordCheckBox, 55.0);
+    
+                newPasswordField.textProperty().addListener((observable, oldValue, newValue) ->
+                newPasswordTextField.setText(newValue));
+    
+                newPasswordTextField.textProperty().addListener((observable, oldValue,
+                newValue) -> newPasswordField.setText(newValue));
+    
+                confirmPasswordField.textProperty().addListener((observable, oldValue, newValue) ->
+                confirmPasswordTextField.setText(newValue));
+    
+                confirmPasswordTextField.textProperty().addListener((observable, oldValue,
+                newValue) -> confirmPasswordField.setText(newValue));
+    
+                showPasswordCheckBox.setOnAction(e ->{
+                    if(showPasswordCheckBox.isSelected()){
+                        newPasswordTextField.setText(newPasswordField.getText());
+                        grid.getChildren().remove(newPasswordField);
+                        grid.add(newPasswordTextField, 1, 0);
+    
+                        confirmPasswordTextField.setText(confirmPasswordField.getText());
+                        grid.getChildren().remove(confirmPasswordField);
+                        grid.add(confirmPasswordTextField, 1, 1);
+                        
+                        newPasswordTextField.requestFocus();
+                        newPasswordTextField.positionCaret(newPasswordTextField.getText().length());
+                    }
+                    else{
+                        newPasswordField.setText(newPasswordTextField.getText());
+                        grid.getChildren().remove(newPasswordTextField);
+                        grid.add(newPasswordField, 1, 0);
+    
+                        confirmPasswordField.setText(confirmPasswordTextField.getText());
+                        grid.getChildren().remove(confirmPasswordTextField);
+                        grid.add(confirmPasswordField, 1, 1);
+    
+    
+                        newPasswordField.requestFocus();
+                        newPasswordField.positionCaret(newPasswordField.getText().length());
+                    }
+                });
+    
+                primaryStage.setWidth(400);
+                primaryStage.setHeight(250);
+                primaryStage.centerOnScreen();
 
             } else if (otp == null) {
-                forgotPasswordEmailLabel.setText("The code has expired. Try resending it.");
+                codeErrorMessage.setText("The code has expired. Try resending it.");
+                forgotPasswordEmailField.clear();
+                forgotPasswordEmailField.requestFocus();
+
+                forgotPasswordPanel.getChildren().removeIf(node -> node instanceof Label && ((Label) node).getId() != null && ((Label) node).getId().equals("codeErrorMessage"));
+
+                forgotPasswordPanel.getChildren().add(codeErrorMessage);
+                AnchorPane.setTopAnchor(codeErrorMessage, 95.0);
+                AnchorPane.setLeftAnchor(codeErrorMessage, 180.0);
             } else {
-                forgotPasswordEmailLabel.setText("Invalid one-time code. Try again.");
+                codeErrorMessage.setText("Invalid one-time code. Try again.");
+                forgotPasswordEmailField.clear();
+                forgotPasswordEmailField.requestFocus();
+
+                forgotPasswordPanel.getChildren().removeIf(node -> node instanceof Label && ((Label) node).getId() != null && ((Label) node).getId().equals("codeErrorMessage"));
+
+                forgotPasswordPanel.getChildren().add(codeErrorMessage);
+                AnchorPane.setTopAnchor(codeErrorMessage, 95.0);
+                AnchorPane.setLeftAnchor(codeErrorMessage, 195.0);
             }
         });
 
-        forgotPasswordScene = new Scene(forgotPasswordPanel, 390, 280);
+        resetButton.setOnAction(e -> {
+            if(!newPasswordField.getText().equals(confirmPasswordField.getText()) || newPasswordField.getText().isBlank() || confirmPasswordField.getText().isBlank()){
+                codeErrorMessage.setText("Passwords do not match. Please try again.");
+                newPasswordField.clear();
+                confirmPasswordField.clear();
+                newPasswordField.requestFocus();
+
+                forgotPasswordPanel.getChildren().removeIf(node -> node instanceof Label && ((Label) node).getId() != null && ((Label) node).getId().equals("codeErrorMessage"));
+
+                forgotPasswordPanel.getChildren().add(codeErrorMessage);
+                AnchorPane.setTopAnchor(codeErrorMessage, 130.0);
+                AnchorPane.setLeftAnchor(codeErrorMessage, 170.0);
+            }
+            else{
+
+                // Update the user's password
+                userDAO.updateUserPassword(confirmPasswordField.getText());
+
+                codeErrorMessage.setText("Password reset successful.");
+                codeErrorMessage.setStyle("-fx-text-fill: #26FF21;");
+                newPasswordField.clear();
+                confirmPasswordField.clear();
+                newPasswordField.setDisable(true);
+                confirmPasswordField.setDisable(true);
+                resetButton.setDisable(true);
+                forgotPasswordCancelButton.setDisable(true);
+
+                forgotPasswordPanel.getChildren().removeIf(node -> node instanceof Label && ((Label) node).getId() != null && ((Label) node).getId().equals("codeErrorMessage"));
+
+                forgotPasswordPanel.getChildren().add(codeErrorMessage);
+                AnchorPane.setTopAnchor(codeErrorMessage, 130.0);
+                AnchorPane.setLeftAnchor(codeErrorMessage, 170.0);
+                
+                PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                pause.setOnFinished(event -> {
+                    primaryStage.setScene(LoginWindow.scene);
+                    LoginWindow.emailField.clear();
+                    LoginWindow.passwordField.clear();
+                    LoginWindow.passwordFieldViewed.clear();
+                    LoginWindow.emailField.requestFocus();
+                    primaryStage.sizeToScene();
+                    primaryStage.centerOnScreen();
+                });
+                pause.play();
+            }
+        });
+
+        forgotPasswordScene = new Scene(forgotPasswordPanel, 390, 155);
         String css = this.getClass().getResource("/stylesheets/forgotPasswordWindow.css").toExternalForm();
         forgotPasswordScene.getStylesheets().add(css);
 
         KeyCodeCombination searchHotKey = new KeyCodeCombination(KeyCode.ENTER);
-        forgotPasswordScene.getAccelerators().put(searchHotKey, () -> forgotPasswordSubmitButton.fire());
+        forgotPasswordScene.getAccelerators().put(searchHotKey, () -> {
+            if(forgotPasswordPanel.getChildren().contains(forgotPasswordSubmitButton)){
+                forgotPasswordSubmitButton.fire();
+            }
+            else if(forgotPasswordPanel.getChildren().contains(resetButton)){
+                resetButton.fire();
+            }
+            else if(forgotPasswordPanel.getChildren().contains(verifyCodeButton)){
+                verifyCodeButton.fire();
+            }
+        });
 
         primaryStage.setScene(forgotPasswordScene);
+        primaryStage.centerOnScreen();
     }
 
     public void sendEmail(String email, String otp) {
@@ -205,7 +366,8 @@ public class ForgotPasswordScene {
         final String subject = "One-Time Code";
         final String body = "<html><body>" +
                 "Your one-time code is: <b>" + otp + "</b><br>" +
-                " This code will expire in 2 minutes." +
+                " This code will expire in 2 minutes.<br>" +
+                " If you didn't request a security code, please contact your administrator." +
                 "</body></html>";
 
         // Set up the SMTP server properties
