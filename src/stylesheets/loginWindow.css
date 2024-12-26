@@ -1,0 +1,120 @@
+.root{
+    -fx-background-color: #00205b
+}
+
+.label{
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Monaco";
+    -fx-text-fill: #eaaa00;
+}
+
+#errorMessage{
+    -fx-font-size: 10px; /* Smaller font size */
+    -fx-font-weight: bold; /* Bold text for emphasis */
+    -fx-text-fill: red; /* Red text color */
+    -fx-background-color: transparent; /* Transparent background */
+    -fx-padding: 5px; /* Add some padding */
+}
+
+#forgotPasswordLabel{
+    -fx-font-size: 12px;
+    -fx-text-fill: #eaaa00;
+}
+
+#forgotPasswordLabel:hover{
+    -fx-text-fill: #285c4d;
+    -fx-cursor: hand;
+    -fx-underline: true;
+}
+
+#showPassBox {
+    -fx-font-size: 12px; /* Font size for the text */
+    -fx-cursor: hand; /* Pointer cursor */
+}
+
+#showPassBox .box {
+    -fx-pref-width: 12px; /* Size of the box */
+    -fx-pref-height: 12px;
+    -fx-border-color: #eaaa00; /* Default border color (gold) */
+    -fx-border-width: 2px; /* Border width */
+    -fx-background-color: transparent; /* Transparent background by default */
+    -fx-border-radius: 3px; /* Rounded corners for the box */
+    -fx-background-radius: 3px;
+}
+
+#showPassBox .box:hover,
+#showPassBox:hover .box {
+    -fx-border-color: #FFD700; /* Bright gold border on hover */
+}
+
+#showPassBox:hover .text,
+#showPassBox .text:hover {
+    -fx-fill: #FFD700; /* Bright gold text on hover */
+}
+
+#showPassBox:selected .box {
+    -fx-background-color: #eaaa00; /* Fill background with bright gold when checked */
+    -fx-border-color: #ffbb0089; /* Change border to blue for contrast */
+}
+
+#showPassBox:selected .mark {
+    -fx-background-color: #285c4d;
+    
+}
+
+#showPassBox .text {
+    -fx-fill: #eaaa00; /* Gold text as default */
+}
+
+#showPassBox > .box {
+    -fx-paddings: 2px;
+}
+
+#showPassBox > .box > .mark {
+    -fx-paddings: 2px;
+}
+
+
+#connectButton{
+    -fx-background-color: linear-gradient(to bottom, #eaaa00, #cc8f00); /* Smooth Gold Gradient */
+    -fx-border-color: #00205b; /* Blue Border for Contrast */
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px; /* Rounded Edges for a Softer Look */
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(gaussian, #285c4d, 5, 0.5, 0, 2); /* Subtle Drop Shadow for Depth */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Monaco";
+    -fx-text-fill: #00205b; /* Blue Text for Contrast */
+    -fx-pref-width: 85; /* Slightly Wider for Balance */
+    -fx-pref-height: 35; /* Proportional Height */
+}
+
+#connectButton:hover{
+    -fx-background-color: linear-gradient(to bottom, #cc8f00, #eaaa00); /* Reverse Gradient on Hover */
+    -fx-border-color: #285c4d; /* Green Border on Hover for Interactivity */
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #00205b, 7, 0.6, 0, 3); /* Enhance Shadow on Hover */
+}
+
+#connectButton:pressed {
+    -fx-background-color: #cc8f00; /* Slightly Darker Gold on Click */
+    -fx-border-color: #00205b; /* Retain Blue Border */
+    -fx-effect: none; /* Remove Shadow for Click Feedback */
+    -fx-text-fill: #eaaa00; /* Bright Gold Text for Pressed State */
+}
+
+.text-field{
+    -fx-background-color: white;
+    -fx-border-color: #285c4d; /* Green Border */
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-text-fill: #00205b; /* Blue Text */
+    -fx-padding: 5px;
+}
+
+.root {
+    -fx-border-color: #285c4d; /* Green Accent for Main Window */
+    -fx-border-width: 3px;
+}
