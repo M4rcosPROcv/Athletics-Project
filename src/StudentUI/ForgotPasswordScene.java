@@ -1,14 +1,20 @@
 package StudentUI;
 
-import java.io.FileReader;
-import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.Base64;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
@@ -16,10 +22,9 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.Message;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import DAO.UserDAO;
 import javafx.animation.PauseTransition;
@@ -357,19 +362,27 @@ public class ForgotPasswordScene {
         primaryStage.centerOnScreen();
     }
 
+    public static byte[] decrypt(byte[] encryptedData, SecretKey secretKey, byte[] iv) throws Exception{
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
+        IvParameterSpec ivSpec = new IvParameterSpec(iv);
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
+        return cipher.doFinal(encryptedData);
+    }
+
     public void sendEmail(String email, String otp) {
 
+        
         // Email details
         final String senderEmail;
         final String senderPassword;
         final String receiverEmail = email;
         final String subject = "One-Time Code";
         final String body = "<html><body>" +
-                "Your one-time code is: <b>" + otp + "</b><br>" +
-                " This code will expire in 2 minutes.<br>" +
-                " If you didn't request a security code, please contact your administrator." +
-                "</body></html>";
-
+        "Your one-time code is: <b>" + otp + "</b><br>" +
+        " This code will expire in 2 minutes.<br>" +
+        " If you didn't request a security code, please contact your administrator." +
+        "</body></html>";
+        
         // Set up the SMTP server properties
         Properties properties = new Properties();
         properties.put("mail.smtp.host", "smtp.gmail.com");
@@ -378,13 +391,27 @@ public class ForgotPasswordScene {
         properties.put("mail.smtp.starttls.enable", "true"); // Enable STARTTLS
 
         try {
-            Object o = new JSONParser().parse(new FileReader("config.json"));
 
-            JSONArray emailArray = (JSONArray) o;
+            String keyBase64 = "wdLku0Kt+bhOrQA31FsKFyHLNKZEAUPugZz2YhTSIe0=";
+            String ivBase64 = "6pHjApAZoeZM1uDTlkUIRg==";
+    
+            String encryptedPath = "src/resources/EncryptConfig.json";
+        
+            byte[] keyBytes = Base64.getDecoder().decode(keyBase64);
+            byte[] ivBytes = Base64.getDecoder().decode(ivBase64);
+    
+            SecretKey secretKey = new SecretKeySpec(keyBytes, "AES");
+    
+            byte[] encryptedData = Files.readAllBytes(Paths.get(encryptedPath));
+            byte[] decryptedData = decrypt(encryptedData, secretKey, ivBytes);
+    
+            String jsonContent = new String(decryptedData);
 
-            JSONObject j = (JSONObject) emailArray.get(1);
-            senderEmail = (String) j.get("email_username");
-            senderPassword = (String) j.get("email_password");
+            JsonArray dbArray = JsonParser.parseString(jsonContent).getAsJsonArray();
+            JsonObject j = dbArray.get(1).getAsJsonObject();
+            
+            senderEmail = j.get("email_username").getAsString();
+            senderPassword = j.get("email_password").getAsString();
 
             // Get a session object
             Session session = Session.getInstance(properties,
@@ -395,25 +422,22 @@ public class ForgotPasswordScene {
                     });
 
             // Create a MimeMessage
-            try {
-                Message message = new MimeMessage(session);
+           
+            Message message = new MimeMessage(session);
 
-                // Set the sender and recipient email addresses
-                message.setFrom(new InternetAddress(senderEmail));
-                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(receiverEmail));
+            // Set the sender and recipient email addresses
+            message.setFrom(new InternetAddress(senderEmail));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(receiverEmail));
 
-                // Set the email message content
-                message.setSubject(subject);
-                message.setContent(body, "text/html");
+            // Set the email message content
+            message.setSubject(subject);
+            message.setContent(body, "text/html");
 
-                // Send the email
-                Transport.send(message);
+            // Send the email
+            Transport.send(message);
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
-        } catch (IOException | ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
