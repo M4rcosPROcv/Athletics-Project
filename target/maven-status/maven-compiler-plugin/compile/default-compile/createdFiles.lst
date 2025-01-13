@@ -1,0 +1,11 @@
+com\DAO\StudentDAO.class
+com\Student\Student.class
+com\StudentUI\StudentUI.class
+com\DAO\Database.class
+com\StudentUI\ForgotPasswordScene$1.class
+com\DAO\UserDAO.class
+com\StudentUI\LoginWindow.class
+com\portal\Main.class
+com\StudentUI\ForgotPasswordScene.class
+com\DAO\StudentDAOIntf.class
+com\portal\App.class

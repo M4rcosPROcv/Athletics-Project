@@ -1,12 +1,6 @@
 {
-    "java.project.sourcePaths": ["src"],
-    "java.project.outputPath": "bin",
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar"
-    ],
-    "cSpell.words": [
-        "creds",
-        "Intf",
-        "ostudent"
-    ]
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.project.resourceFilters": [],
+    "java.project.outputPath": "target/classes",
+    "java.project.referencedLibraries": ["src/main/resources"]
 }
