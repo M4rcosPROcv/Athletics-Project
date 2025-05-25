@@ -83,9 +83,13 @@ src/
 📸 Screenshots
 
 ![image](https://github.com/user-attachments/assets/1fc6ac12-5056-444a-b176-f6e269d74a38)
+
 ![image](https://github.com/user-attachments/assets/7c42bac5-7574-4a07-8d8f-3b2e428b8442)
+
 ![image](https://github.com/user-attachments/assets/d37690fd-77cf-4781-abe4-d20835a212d0)
+
 ![image](https://github.com/user-attachments/assets/faed919a-5c56-474a-b389-2afdb7fc2a5e)
+
 ![image](https://github.com/user-attachments/assets/296c2616-a960-43f8-8c95-31641fdd1f5a)
 
 ---
