@@ -54,7 +54,7 @@ src/
         │   └── loginWindow.css
         ├── config.json             # Config file for DB or app settings
         └── icon.png                # Application icon
-
+```
 ---
 
 ## 🧪 Example Functionalities
