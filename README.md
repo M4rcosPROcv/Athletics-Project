@@ -27,32 +27,33 @@ This is the original version of the Student Athlete Management System — a desk
 
 ## 📁 Project Structure
 
+```plaintext
 src/
 └── main/
-├── java/com/
-│ ├── DAO/ # Data Access Objects and interfaces
-│ │ ├── Database.java
-│ │ ├── StudentDAO.java
-│ │ ├── StudentDAOIntf.java
-│ │ └── UserDAO.java
-│ ├── models/
-│ │ └── Student.java # Student entity class
-│ ├── portal/
-│ │ ├── App.java # Application launcher
-│ │ └── Main.java # Main entry point
-│ └── StudentUI/
-│ ├── DashboardWindow.java
-│ ├── ForgotPasswordScene.java
-│ ├── LoginWindow.java
-│ └── SceneController.java
-└── resources/
-├── stylesheets/
-│ ├── dashboardWindowDark.css
-│ ├── dashboardWindowLight.css
-│ ├── forgotPasswordWindow.css
-│ └── loginWindow.css
-├── config.json # Config file for DB or app settings
-└── icon.png # Application icon
+    ├── java/com/
+    │   ├── DAO/                    # Data Access Objects and interfaces
+    │   │   ├── Database.java
+    │   │   ├── StudentDAO.java
+    │   │   ├── StudentDAOIntf.java
+    │   │   └── UserDAO.java
+    │   ├── models/
+    │   │   └── Student.java        # Student entity class
+    │   ├── portal/
+    │   │   ├── App.java            # Application launcher
+    │   │   └── Main.java           # Main entry point
+    │   └── StudentUI/
+    │       ├── DashboardWindow.java
+    │       ├── ForgotPasswordScene.java
+    │       ├── LoginWindow.java
+    │       └── SceneController.java
+    └── resources/
+        ├── stylesheets/
+        │   ├── dashboardWindowDark.css
+        │   ├── dashboardWindowLight.css
+        │   ├── forgotPasswordWindow.css
+        │   └── loginWindow.css
+        ├── config.json             # Config file for DB or app settings
+        └── icon.png                # Application icon
 
 ---
 
