@@ -102,3 +102,5 @@ This version of the project was originally created to learn:
 
 📌 Status
 This JavaFX version is no longer the main focus of development. It has been replaced by a Spring Boot backend and an Android mobile app, currently being built in a private repository
+
+---
